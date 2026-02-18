@@ -1,7 +1,5 @@
 ![Wingfoil forecast dashboard](docs/images/dashboard.png)
 
-# Wingfoil Forecast
-
 A weather and wingfoil-condition service that aggregates multiple weather models to deliver **wingfoil suitability scores**, equipment recommendations, and forecast APIs, built for clarity, accuracy, and easy deployment.
 
 ---
