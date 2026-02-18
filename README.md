@@ -1,15 +1,15 @@
 # Wingfoil Forecast
 
-A weather and wingfoil-condition service that aggregates multiple weather models to deliver **wingfoil suitability scores**, equipment recommendations, and forecast APIs—built for clarity, accuracy, and easy deployment.
+A weather and wingfoil-condition service that aggregates multiple weather models to deliver **wingfoil suitability scores**, equipment recommendations, and forecast APIs, built for clarity, accuracy, and easy deployment.
 
 ---
 
 ## What it does
 
-- **Multi-model consensus** — Combines KNMI HARMONIE-AROME, DWD ICON-D2, ECMWF IFS, GFS, and OpenWeatherMap with weighted averaging and smart caching.
-- **Wingfoil scoring (0–100)** — Suitability score with gust penalties, wind/shore alignment, and wave conditions; click-through breakdown of how each score is calculated.
-- **Personalisation** — Wing size suggestions by rider weight, skill-level adjustments (beginner/intermediate/advanced), and configurable wind/wave thresholds.
-- **Web dashboard & APIs** — Browser UI for current conditions and forecasts; REST APIs for integration (e.g. InkyPi, other clients).
+- **Multi-model consensus**: Combines KNMI HARMONIE-AROME, DWD ICON-D2, ECMWF IFS, GFS, and OpenWeatherMap with weighted averaging and smart caching.
+- **Wingfoil scoring (0–100)**: Suitability score with gust penalties, wind/shore alignment, and wave conditions; click-through breakdown of how each score is calculated.
+- **Personalisation**: Wing size suggestions by rider weight, skill-level adjustments (beginner/intermediate/advanced), and configurable wind/wave thresholds.
+- **Web dashboard & APIs**: Browser UI for current conditions and forecasts; REST APIs for integration (e.g. InkyPi, other clients).
 
 ---
 
@@ -40,8 +40,8 @@ High-level flow: **Config** (location, shore direction, preferences) → **Weath
 
 ## Project structure (summary)
 
-- `app/main.py` — Flask app, routes, caching, scoring, and model aggregation.
-- `app/templates/` — Dashboard, settings, API help (HTML).
-- `app/static/` — Static assets and overlay SVGs.
-- `config/` — Config and example config (not committed).
-- `docs/` — Internal docs and screenshots.
+- `app/main.py`: Flask app, routes, caching, scoring, and model aggregation.
+- `app/templates/`: Dashboard, settings, API help (HTML).
+- `app/static/`: Static assets and overlay SVGs.
+- `config/`: Config and example config (not committed).
+- `docs/`: Internal docs and screenshots.
