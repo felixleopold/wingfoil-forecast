@@ -1,3 +1,5 @@
+![Wingfoil forecast dashboard](docs/images/dashboard.png)
+
 # Wingfoil Forecast
 
 A weather and wingfoil-condition service that aggregates multiple weather models to deliver **wingfoil suitability scores**, equipment recommendations, and forecast APIs, built for clarity, accuracy, and easy deployment.
@@ -16,14 +18,6 @@ A weather and wingfoil-condition service that aggregates multiple weather models
 ## Why it’s useful
 
 Generic weather apps don’t answer “is it good to go wingfoiling?” This service does: it turns raw marine and standard weather data into a single, interpretable score and equipment guidance, so you can decide quickly and safely. It’s built with Dutch/European spots in mind (with a default location) but works globally via the included models.
-
----
-
-## Screenshot
-
-The main dashboard view shows current and forecasted conditions, the 0–100 wingfoil score, and key details like wind, gusts, and wave state:
-
-![Wingfoil forecast dashboard](docs/images/dashboard.png)
 
 ---
 
