@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation - Wingfoil Forecast</title>
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --border-primary: #e2e8f0;
+            --border-secondary: #cbd5e1;
+            --accent-primary: #3b82f6;
+            --accent-secondary: #1e40af;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --border-primary: #334155;
+            --border-secondary: #475569;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #3b82f6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border-primary);
+        }
+
+        .header-content h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .header-content p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-md);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: var(--bg-secondary);
+            border-color: var(--border-secondary);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-primary {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-secondary);
+            border-color: var(--accent-secondary);
+        }
+
+        .btn-icon {
+            padding: 10px;
+            width: 40px;
+            height: 40px;
+            justify-content: center;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 32px;
+        }
+
+        .main-content {
+            min-width: 0;
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 24px;
+            height: fit-content;
+        }
+
+        .card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 24px;
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        .card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            margin-top: 24px;
+        }
+
+        .card h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            margin-top: 16px;
+        }
+
+        .endpoint {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .endpoint-method {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .method-get {
+            background: var(--success);
+            color: white;
+        }
+
+        .method-post {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .endpoint-path {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .endpoint-description {
+            color: var(--text-secondary);
+            margin-top: 8px;
+            font-size: 0.9rem;
+        }
+
+        .code-block {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin: 16px 0;
+            overflow-x: auto;
+        }
+
+        .code-block pre {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .nav-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .nav-list li {
+            margin-bottom: 8px;
+        }
+
+        .nav-list a {
+            display: block;
+            padding: 8px 12px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .nav-list a:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .nav-list a.active {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .response-example {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin: 16px 0;
+        }
+
+        .response-example h4 {
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .response-example pre {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--text-primary);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-x: auto;
+        }
+
+        .alert {
+            padding: 16px;
+            border-radius: var(--radius-md);
+            margin: 16px 0;
+            border-left: 4px solid;
+        }
+
+        .alert-info {
+            background: rgba(59, 130, 246, 0.1);
+            border-left-color: var(--accent-primary);
+            color: var(--text-primary);
+        }
+
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            border-left-color: var(--warning);
+            color: var(--text-primary);
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            border-left-color: var(--success);
+            color: var(--text-primary);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+
+        .table th,
+        .table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-primary);
+        }
+
+        .table th {
+            background: var(--bg-secondary);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .table td {
+            color: var(--text-secondary);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .badge-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .badge-error {
+            background: var(--error);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                position: static;
+                order: -1;
+            }
+            
+            .container {
+                padding: 16px;
+            }
+            
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+            
+            .header-content h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1>API Documentation</h1>
+                <p>Wingfoil Forecast Service API Reference</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-icon" onclick="toggleTheme()" title="Toggle Dark Mode">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                </button>
+                <a href="/" class="btn btn-primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="2"/>
+                        <polyline points="9,22 9,12 15,12 15,22" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    Back to Dashboard
+                </a>
+            </div>
+        </header>
+
+        <div class="content">
+            <div class="main-content">
+                <div class="card">
+                    <h2>Overview</h2>
+                    <p>The Wingfoil Forecast API provides real-time weather data and advanced wingfoil condition analysis using a sophisticated 4-pillar scoring system. All endpoints return JSON data and support CORS for web applications.</p>
+                    
+                    <div class="alert alert-info">
+                        <strong>Base URL:</strong> <code>https://wingfoil.felixmrak.com</code><br>
+                        <strong>Content-Type:</strong> <code>application/json</code><br>
+                        <strong>Authentication:</strong> None required for read endpoints
+                    </div>
+                </div>
+
+                <div class="card" id="current-conditions">
+                    <h2>Current Conditions</h2>
+                    <div class="endpoint">
+                        <div>
+                            <span class="endpoint-method method-get">GET</span>
+                            <span class="endpoint-path">/api/current-conditions</span>
+                        </div>
+                        <div class="endpoint-description">
+                            Returns comprehensive current weather conditions and wingfoil analysis with detailed score breakdown.
+                        </div>
+                    </div>
+
+                    <h3>Response Structure</h3>
+                    <div class="response-example">
+                        <h4>Example Response</h4>
+                        <pre>{
+  "weather": {
+    "wind_speed_knots": 12.5,
+    "wind_direction": 180,
+    "wind_gust_ms": 15.2,
+    "wave_height": 0.8,
+    "wave_period": 4.2,
+    "temperature": 14.8,
+    "pressure": 1013.2,
+    "humidity": 75,
+    "visibility": 10000,
+    "uv_index": 3,
+    "location": "Current Location",
+    "timestamp": "2024-01-15T10:30:00Z"
+  },
+  "wingfoil": {
+    "score": 75,
+    "suitable": true,
+    "overall_conditions": "Good",
+    "confidence": 0.85,
+    "skill_level": "intermediate",
+    "score_breakdown": {
+      "formula": {
+        "overall": "Overall = clamp(100 × (0.60×Wind + 0.20×Surface + 0.15×Safety + 0.05×Comfort) × Confidence, 0, 100)",
+        "wind": "Wind = 0.55×Speed + 0.20×Direction + 0.25×Consistency",
+        "surface": "Surface = 0.55×WaveQuality + 0.25×Chop + 0.20×Current",
+        "safety": "Safety = Base × Weather × WindChill × Visibility",
+        "comfort": "Comfort = (Temp + Rain + Humidity) / 3"
+      },
+      "current_values": {
+        "wind_speed_ms": 6.4,
+        "wind_speed_knots": 12.5,
+        "wind_direction": 180,
+        "gust_factor": 1.22,
+        "wave_height": 0.8,
+        "wave_period": 4.2,
+        "temperature": 14.8,
+        "visibility": 10000
+      },
+      "interpretations": {
+        "wind_direction": "Onshore",
+        "gust_factor": "Moderately gusty",
+        "wind_speed_category": "Optimal",
+        "wave_category": "Moderate",
+        "temperature_category": "Cool"
+      },
+      "pillar_details": {
+        "wind": {
+          "speed_score": 0.85,
+          "direction_score": 0.70,
+          "consistency_score": 0.90,
+          "total_score": 0.82,
+          "weighted_contribution": 0.39
+        },
+        "surface": {
+          "wave_quality": 0.75,
+          "chop_score": 0.80,
+          "current_score": 0.95,
+          "total_score": 0.78,
+          "weighted_contribution": 0.13
+        },
+        "safety": {
+          "base_safety": 0.85,
+          "weather_factor": 1.0,
+          "wind_chill_factor": 1.0,
+          "visibility_factor": 1.0,
+          "total_score": 0.85,
+          "weighted_contribution": 0.11
+        },
+        "comfort": {
+          "temp_score": 0.65,
+          "rain_score": 1.0,
+          "humidity_score": 0.90,
+          "total_score": 0.85,
+          "weighted_contribution": 0.04
+        }
+      }
+    },
+    "weights": {
+      "wind": 0.60,
+      "surface": 0.20,
+      "safety": 0.15,
+      "comfort": 0.05
+    },
+    "weighted_contributions": {
+      "wind": 0.39,
+      "surface": 0.13,
+      "safety": 0.11,
+      "comfort": 0.04
+    },
+    "computation_trace": {
+      "wind_speed_ms": 6.4,
+      "wind_gust_ms": 15.2,
+      "wind_direction": 180,
+      "shore_direction": 90,
+      "wave_height": 0.8,
+      "wave_period": 4.2,
+      "temperature": 14.8,
+      "visibility": 10000,
+      "gust_factor": 1.22
+    }
+  },
+  "wingfoil_advice": {
+    "recommended_wing_size": "6m",
+    "wing_notes": ["Good wind range", "Stable conditions"],
+    "foil_advice": {
+      "size": "1400cm²",
+      "description": "All-around foil for intermediate riders"
+    },
+    "board_advice": {
+      "size": "130L",
+      "description": "Stable board for learning"
+    },
+    "combined_advice": [
+      "Ideal conditions for intermediate riders",
+      "Consider bringing a smaller wing for gusts",
+      "Water temperature is comfortable"
+    ]
+  },
+  "multi_model": {
+    "consensus": {
+      "median_wind_knots": 12.5,
+      "median_gust_knots": 15.2,
+      "spread_knots": 1.2,
+      "gust_factor": 1.22,
+      "valid_time_iso": "2024-01-15T10:30:00Z",
+      "generated_at_iso": "2024-01-15T10:25:00Z"
+    },
+    "per_model": {
+      "Open-Meteo": {
+        "wind_speed_knots": 12.0,
+        "wind_gust_knots": 14.8
+      },
+      "OpenWeather": {
+        "wind_speed_knots": 13.0,
+        "wind_gust_knots": 15.6
+      }
+    }
+  }
+}</pre>
+                    </div>
+                </div>
+
+                <div class="card" id="hourly-forecast">
+                    <h2>Hourly Forecast</h2>
+                    <div class="endpoint">
+                        <div>
+                            <span class="endpoint-method method-get">GET</span>
+                            <span class="endpoint-path">/api/hourly-forecast</span>
+                        </div>
+                        <div class="endpoint-description">
+                            Returns today's hourly forecast for daylight hours with wingfoil analysis.
+                        </div>
+                    </div>
+
+                    <h3>Response Structure</h3>
+                    <div class="response-example">
+                        <h4>Example Response</h4>
+                        <pre>{
+  "date": "2024-01-15",
+  "summary": {
+    "total_hours": 12,
+    "suitable_hours": 8,
+    "good_hours": 5,
+    "excellent_hours": 2
+  },
+  "hourly_forecast": [
+    {
+      "time": "10:00",
+      "wind": {
+        "speed_knots": 12.5,
+        "gust_knots": 15.2,
+        "direction": 180
+      },
+      "waves": {
+        "height_m": 0.8,
+        "period_s": 4.2
+      },
+      "conditions": {
+        "temperature": 14.8,
+        "pressure": 1013.2,
+        "uv_index": 3
+      },
+      "wingfoil": {
+        "score": 75,
+        "overall_conditions": "Good",
+        "wing_size": "6m"
+      }
+    }
+  ]
+}</pre>
+                    </div>
+                </div>
+
+                <div class="card" id="tomorrow-forecast">
+                    <h2>Tomorrow's Forecast</h2>
+                    <div class="endpoint">
+                        <div>
+                            <span class="endpoint-method method-get">GET</span>
+                            <span class="endpoint-path">/api/tomorrow-forecast</span>
+                        </div>
+                        <div class="endpoint-description">
+                            Returns tomorrow's hourly forecast for daylight hours with wingfoil analysis.
+                        </div>
+                    </div>
+
+                    <h3>Response Structure</h3>
+                    <p>Same structure as hourly forecast but for the next day.</p>
+                </div>
+
+                <div class="card" id="five-day-forecast">
+                    <h2>5-Day Forecast</h2>
+                    <div class="endpoint">
+                        <div>
+                            <span class="endpoint-method method-get">GET</span>
+                            <span class="endpoint-path">/api/5day-forecast</span>
+                        </div>
+                        <div class="endpoint-description">
+                            Returns a 5-day daily overview with suitability analysis.
+                        </div>
+                    </div>
+
+                    <h3>Response Structure</h3>
+                    <div class="response-example">
+                        <h4>Example Response</h4>
+                        <pre>{
+  "days": [
+    {
+      "day": "Monday",
+      "date": "2024-01-15",
+      "wind_knots_avg": 12.5,
+      "gust_knots_avg": 15.2,
+      "temperature_c_avg": 14.8,
+      "wave_height_m_avg": 0.8,
+      "suitability": "Good"
+    }
+  ]
+}</pre>
+                    </div>
+                </div>
+
+                <div class="card" id="daily-summary">
+                    <h2>Daily Summary</h2>
+                    <div class="endpoint">
+                        <div>
+                            <span class="endpoint-method method-get">GET</span>
+                            <span class="endpoint-path">/api/daily-summary</span>
+                        </div>
+                        <div class="endpoint-description">
+                            Returns current day summary with high-resolution data.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" id="inkypi-report">
+                    <h2>InkyPi Morning Report</h2>
+                    <div class="endpoint">
+                        <div>
+                            <span class="endpoint-method method-get">GET</span>
+                            <span class="endpoint-path">/api/inkypi/morning-report</span>
+                        </div>
+                        <div class="endpoint-description">
+                            Simplified report formatted for e-ink displays.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" id="health-check">
+                    <h2>Health Check</h2>
+                    <div class="endpoint">
+                        <div>
+                            <span class="endpoint-method method-get">GET</span>
+                            <span class="endpoint-path">/health</span>
+                        </div>
+                        <div class="endpoint-description">
+                            Service health check endpoint.
+                        </div>
+                    </div>
+
+                    <h3>Response Structure</h3>
+                    <div class="response-example">
+                        <h4>Example Response</h4>
+                        <pre>{
+  "status": "healthy",
+  "timestamp": "2024-01-15T10:30:00Z",
+  "version": "2.0.0",
+  "uptime": 86400
+}</pre>
+                    </div>
+                </div>
+
+                <div class="card" id="configuration">
+                    <h2>Configuration</h2>
+                    <div class="endpoint">
+                        <div>
+                            <span class="endpoint-method method-get">GET</span>
+                            <span class="endpoint-path">/api/config</span>
+                        </div>
+                        <div class="endpoint-description">
+                            Get current configuration settings.
+                        </div>
+                    </div>
+
+                    <div class="endpoint">
+                        <div>
+                            <span class="endpoint-method method-post">POST</span>
+                            <span class="endpoint-path">/api/config</span>
+                        </div>
+                        <div class="endpoint-description">
+                            Update configuration settings. Requires admin token.
+                        </div>
+                    </div>
+
+                    <h3>Request Body</h3>
+                    <div class="response-example">
+                        <h4>Example Request</h4>
+                        <pre>{
+  "location": {
+    "name": "My Spot",
+    "latitude": 51.8781,
+    "longitude": 5.8654,
+    "shore_direction": 90
+  },
+  "user": {
+    "skill_level": "intermediate",
+    "rider_weight_kg": 70
+  },
+  "wingfoil_preferences": {
+    "min_wind_knots": 12,
+    "max_wind_knots": 30,
+    "optimal_wind_min": 15,
+    "optimal_wind_max": 25,
+    "max_wave_height": 1.5
+  }
+}</pre>
+                    </div>
+                </div>
+
+                <div class="card" id="spot-map">
+                    <h2>Spot Map</h2>
+                    <div class="endpoint">
+                        <div>
+                            <span class="endpoint-method method-get">GET</span>
+                            <span class="endpoint-path">/spot-map</span>
+                        </div>
+                        <div class="endpoint-description">
+                            Get the current spot map image.
+                        </div>
+                    </div>
+
+                    <div class="endpoint">
+                        <div>
+                            <span class="endpoint-method method-post">POST</span>
+                            <span class="endpoint-path">/api/spot-map</span>
+                        </div>
+                        <div class="endpoint-description">
+                            Upload a new spot map image. Requires admin token.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" id="scoring-algorithm">
+                    <h2>V2 Scoring Algorithm</h2>
+                    <p>The service uses an advanced 4-pillar scoring system that provides transparent, skill-adaptive wingfoil condition analysis:</p>
+
+                    <h3>Overall Formula</h3>
+                    <div class="code-block">
+                        <pre>Overall = clamp(100 × (0.60×Wind + 0.20×Surface + 0.15×Safety + 0.05×Comfort) × Confidence, 0, 100)</pre>
+                    </div>
+
+                    <h3>Pillar Breakdown</h3>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Pillar</th>
+                                <th>Weight</th>
+                                <th>Components</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Wind</strong></td>
+                                <td>60%</td>
+                                <td>Speed, Direction, Consistency</td>
+                                <td>Gaussian speed scoring, shore alignment, gust penalties</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Surface</strong></td>
+                                <td>20%</td>
+                                <td>Wave Quality, Chop, Current</td>
+                                <td>Wave steepness, wind-sea interaction, tidal effects</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Safety</strong></td>
+                                <td>15%</td>
+                                <td>Gust Factor, Weather, Visibility</td>
+                                <td>Gust consistency, precipitation, wind-chill, visibility</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Comfort</strong></td>
+                                <td>5%</td>
+                                <td>Temperature, Rain, Humidity</td>
+                                <td>Thermal comfort, precipitation, humidity levels</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Skill Level Adaptation</h3>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Skill Level</th>
+                                <th>Wind Range (m/s)</th>
+                                <th>Optimal Range (m/s)</th>
+                                <th>Safety Factors</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="badge badge-success">Beginner</span></td>
+                                <td>6-16</td>
+                                <td>9-13</td>
+                                <td>Offshore wind caps, enhanced safety</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge badge-warning">Intermediate</span></td>
+                                <td>7-18</td>
+                                <td>10-15</td>
+                                <td>Standard safety factors</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge badge-error">Advanced</span></td>
+                                <td>8-22</td>
+                                <td>11-18</td>
+                                <td>Reduced safety penalties</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Score Interpretation</h3>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Score Range</th>
+                                <th>Conditions</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>85-100</td>
+                                <td><span class="badge badge-success">Excellent</span></td>
+                                <td>Perfect conditions for wingfoiling</td>
+                            </tr>
+                            <tr>
+                                <td>70-84</td>
+                                <td><span class="badge badge-success">Good</span></td>
+                                <td>Great conditions with minor limitations</td>
+                            </tr>
+                            <tr>
+                                <td>60-69</td>
+                                <td><span class="badge badge-warning">Marginal</span></td>
+                                <td>Rideable but challenging conditions</td>
+                            </tr>
+                            <tr>
+                                <td>0-59</td>
+                                <td><span class="badge badge-error">Poor</span></td>
+                                <td>Not recommended for wingfoiling</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card" id="error-handling">
+                    <h2>Error Handling</h2>
+                    <p>All endpoints return appropriate HTTP status codes and error messages:</p>
+
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Status Code</th>
+                                <th>Description</th>
+                                <th>Example Response</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>200</td>
+                                <td>Success</td>
+                                <td>Data returned successfully</td>
+                            </tr>
+                            <tr>
+                                <td>400</td>
+                                <td>Bad Request</td>
+                                <td>Invalid parameters or request body</td>
+                            </tr>
+                            <tr>
+                                <td>401</td>
+                                <td>Unauthorized</td>
+                                <td>Missing or invalid admin token</td>
+                            </tr>
+                            <tr>
+                                <td>404</td>
+                                <td>Not Found</td>
+                                <td>Endpoint or resource not found</td>
+                            </tr>
+                            <tr>
+                                <td>500</td>
+                                <td>Internal Server Error</td>
+                                <td>Server error or API failure</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Error Response Format</h3>
+                    <div class="response-example">
+                        <h4>Example Error Response</h4>
+                        <pre>{
+  "error": "Invalid latitude value",
+  "message": "Latitude must be between -90 and 90 degrees",
+  "status": 400
+}</pre>
+                    </div>
+                </div>
+
+                <div class="card" id="rate-limiting">
+                    <h2>Rate Limiting</h2>
+                    <p>The API implements intelligent caching to minimize external API calls:</p>
+                    <ul>
+                        <li><strong>Current Conditions:</strong> Cached for 30 minutes</li>
+                        <li><strong>Hourly Forecast:</strong> Cached for 1 hour</li>
+                        <li><strong>5-Day Forecast:</strong> Cached for 6 hours</li>
+                        <li><strong>Configuration:</strong> No caching</li>
+                    </ul>
+                    
+                    <div class="alert alert-warning">
+                        <strong>Note:</strong> Rate limiting is handled automatically through caching. No explicit rate limits are enforced.
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="card">
+                    <h3>Navigation</h3>
+                    <ul class="nav-list">
+                        <li><a href="#overview">Overview</a></li>
+                        <li><a href="#current-conditions">Current Conditions</a></li>
+                        <li><a href="#hourly-forecast">Hourly Forecast</a></li>
+                        <li><a href="#tomorrow-forecast">Tomorrow's Forecast</a></li>
+                        <li><a href="#five-day-forecast">5-Day Forecast</a></li>
+                        <li><a href="#daily-summary">Daily Summary</a></li>
+                        <li><a href="#inkypi-report">InkyPi Report</a></li>
+                        <li><a href="#health-check">Health Check</a></li>
+                        <li><a href="#configuration">Configuration</a></li>
+                        <li><a href="#spot-map">Spot Map</a></li>
+                        <li><a href="#scoring-algorithm">Scoring Algorithm</a></li>
+                        <li><a href="#error-handling">Error Handling</a></li>
+                        <li><a href="#rate-limiting">Rate Limiting</a></li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3>Quick Start</h3>
+                    <p>Get started with the API:</p>
+                    <div class="code-block">
+                        <pre># Get current conditions
+curl https://wingfoil.felixmrak.com/api/current-conditions
+
+# Get today's forecast
+curl https://wingfoil.felixmrak.com/api/hourly-forecast
+
+# Health check
+curl https://wingfoil.felixmrak.com/health</pre>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Support</h3>
+                    <p>For questions or issues:</p>
+                    <ul>
+                        <li>Check the health endpoint first</li>
+                        <li>Verify your request format</li>
+                        <li>Check rate limiting status</li>
+                        <li>Review error messages</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme management
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('.nav-list a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', initTheme);
+    </script>
+</body>
+</html>

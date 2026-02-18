@@ -17,6 +17,26 @@
     button:hover { background:#4c51bf; }
     .msg { margin-top:12px; color:#2f855a; }
     .upload { border:1px dashed #cbd5e1; padding:14px; border-radius:8px; background:#f8fafc; }
+    .back-btn {
+      background: #ffffff;
+      color: #374151;
+      border: 1px solid #d1d5db;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+    .back-btn:hover {
+      background: #f9fafb;
+      border-color: #9ca3af;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
   </style>
   <script>
     let cfg = {};
@@ -34,7 +54,43 @@
       document.getElementById('maxWave').value = cfg.wingfoil_preferences?.max_wave_height || 1.5;
       document.getElementById('weight').value = cfg.user?.rider_weight_kg || 80;
       document.getElementById('skill').value = cfg.user?.skill_level || 'intermediate';
-      document.getElementById('shorelineLen').value = (cfg.display_settings?.map_overlay?.shoreline_length_pct) ?? 35;
+
+      // Load scoring algorithm settings
+      const scoring = cfg.scoring_algorithm || {};
+      document.getElementById('wind-weight').value = scoring.pillar_weights?.wind || 0.60;
+      document.getElementById('surface-weight').value = scoring.pillar_weights?.surface || 0.20;
+      document.getElementById('safety-weight').value = scoring.pillar_weights?.safety || 0.15;
+      document.getElementById('comfort-weight').value = scoring.pillar_weights?.comfort || 0.05;
+
+      // Load skill targets
+      const beginnerTargets = scoring.skill_targets?.beginner || {};
+      document.getElementById('beginner-min').value = beginnerTargets.min_wind_ms || 6;
+      document.getElementById('beginner-opt-min').value = beginnerTargets.opt_min_wind_ms || 9;
+      document.getElementById('beginner-opt-max').value = beginnerTargets.opt_max_wind_ms || 13;
+      document.getElementById('beginner-max').value = beginnerTargets.max_wind_ms || 16;
+
+      const intermediateTargets = scoring.skill_targets?.intermediate || {};
+      document.getElementById('intermediate-min').value = intermediateTargets.min_wind_ms || 7;
+      document.getElementById('intermediate-opt-min').value = intermediateTargets.opt_min_wind_ms || 10;
+      document.getElementById('intermediate-opt-max').value = intermediateTargets.opt_max_wind_ms || 15;
+      document.getElementById('intermediate-max').value = intermediateTargets.max_wind_ms || 18;
+
+      const advancedTargets = scoring.skill_targets?.advanced || {};
+      document.getElementById('advanced-min').value = advancedTargets.min_wind_ms || 8;
+      document.getElementById('advanced-opt-min').value = advancedTargets.opt_min_wind_ms || 11;
+      document.getElementById('advanced-opt-max').value = advancedTargets.opt_max_wind_ms || 18;
+      document.getElementById('advanced-max').value = advancedTargets.max_wind_ms || 22;
+
+      // Load scoring parameters
+      const params = scoring.scoring_parameters || {};
+      document.getElementById('wind-consistency-penalty').value = params.wind_consistency_penalty || 8;
+      document.getElementById('surface-flatwater-penalty').value = params.surface_flatwater_penalty || 2.0;
+      document.getElementById('surface-height-penalty').value = params.surface_height_penalty || 3.0;
+      document.getElementById('surface-chop-penalty').value = params.surface_chop_penalty || 1.5;
+      document.getElementById('safety-gust-penalty').value = params.safety_gust_penalty || 8;
+
+      // Load display settings
+      document.getElementById('map-type').value = cfg.display_settings?.map_type || 'interactive';
     }
 
     async function saveConfig() {
@@ -56,11 +112,45 @@
           rider_weight_kg: Number(document.getElementById('weight').value),
           skill_level: document.getElementById('skill').value
         },
+        scoring_algorithm: {
+          version: "v2",
+          pillar_weights: {
+            wind: Number(document.getElementById('wind-weight').value),
+            surface: Number(document.getElementById('surface-weight').value),
+            safety: Number(document.getElementById('safety-weight').value),
+            comfort: Number(document.getElementById('comfort-weight').value)
+          },
+          skill_targets: {
+            beginner: {
+              min_wind_ms: Number(document.getElementById('beginner-min').value),
+              opt_min_wind_ms: Number(document.getElementById('beginner-opt-min').value),
+              opt_max_wind_ms: Number(document.getElementById('beginner-opt-max').value),
+              max_wind_ms: Number(document.getElementById('beginner-max').value)
+            },
+            intermediate: {
+              min_wind_ms: Number(document.getElementById('intermediate-min').value),
+              opt_min_wind_ms: Number(document.getElementById('intermediate-opt-min').value),
+              opt_max_wind_ms: Number(document.getElementById('intermediate-opt-max').value),
+              max_wind_ms: Number(document.getElementById('intermediate-max').value)
+            },
+            advanced: {
+              min_wind_ms: Number(document.getElementById('advanced-min').value),
+              opt_min_wind_ms: Number(document.getElementById('advanced-opt-min').value),
+              opt_max_wind_ms: Number(document.getElementById('advanced-opt-max').value),
+              max_wind_ms: Number(document.getElementById('advanced-max').value)
+            }
+          },
+          scoring_parameters: {
+            wind_consistency_penalty: Number(document.getElementById('wind-consistency-penalty').value),
+            surface_flatwater_penalty: Number(document.getElementById('surface-flatwater-penalty').value),
+            surface_height_penalty: Number(document.getElementById('surface-height-penalty').value),
+            surface_chop_penalty: Number(document.getElementById('surface-chop-penalty').value),
+            safety_gust_penalty: Number(document.getElementById('safety-gust-penalty').value)
+          }
+        },
         display_settings: {
           ...(typeof cfg === 'object' ? (cfg.display_settings || {}) : {}),
-          map_overlay: {
-            shoreline_length_pct: Number(document.getElementById('shorelineLen').value || 35)
-          }
+          map_type: document.getElementById('map-type').value
         }
       };
       const headers = { 'Content-Type': 'application/json' };
@@ -73,6 +163,11 @@
       });
       const j = await res.json();
       document.getElementById('msg').textContent = j.message || 'Saved';
+      
+      // Redirect back to main site after successful save
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 1500);
     }
 
     async function uploadMap(ev) {
@@ -85,6 +180,24 @@
       const res = await fetch('/api/spot-map', { method:'POST', headers: admin ? { 'X-Admin-Token': admin } : undefined, body: fd });
       const j = await res.json();
       document.getElementById('msg').textContent = j.message || 'Uploaded';
+      
+      // Refresh the map on the dashboard if it's open
+      if (window.opener && typeof window.opener.refreshSpotMap === 'function') {
+        window.opener.refreshSpotMap();
+      }
+      
+      // Also try to refresh if we're in the same window (dashboard)
+      if (typeof refreshSpotMap === 'function') {
+        refreshSpotMap();
+      }
+      
+      // Show success message with instruction
+      document.getElementById('msg').textContent = (j.message || 'Uploaded') + ' - Map will refresh automatically on dashboard';
+      
+      // Redirect back to main site after successful upload
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 2000);
     }
 
     window.addEventListener('DOMContentLoaded', loadConfig);
@@ -92,6 +205,12 @@
   </head>
 <body>
   <div class="container">
+    <button class="back-btn" onclick="window.location.href='/'">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Back
+    </button>
     <h1>Wingfoil Settings</h1>
     <div class="card">
       <h3>Location</h3>
@@ -151,6 +270,133 @@
       </div>
     </div>
 
+    <div class="card">
+      <h3>V2 Scoring Algorithm Configuration</h3>
+
+      <h4>Pillar Weights (must sum to 1.0)</h4>
+      <div class="row">
+        <div>
+          <label>Wind Weight</label>
+          <input id="wind-weight" type="number" step="0.01" min="0" max="1" />
+        </div>
+        <div>
+          <label>Surface Weight</label>
+          <input id="surface-weight" type="number" step="0.01" min="0" max="1" />
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Safety Weight</label>
+          <input id="safety-weight" type="number" step="0.01" min="0" max="1" />
+        </div>
+        <div>
+          <label>Comfort Weight</label>
+          <input id="comfort-weight" type="number" step="0.01" min="0" max="1" />
+        </div>
+      </div>
+
+      <h4>Skill-Specific Wind Targets (m/s)</h4>
+
+      <h5>Beginner</h5>
+      <div class="row">
+        <div>
+          <label>Min Wind (m/s)</label>
+          <input id="beginner-min" type="number" step="0.1" />
+        </div>
+        <div>
+          <label>Optimal Min (m/s)</label>
+          <input id="beginner-opt-min" type="number" step="0.1" />
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Optimal Max (m/s)</label>
+          <input id="beginner-opt-max" type="number" step="0.1" />
+        </div>
+        <div>
+          <label>Max Wind (m/s)</label>
+          <input id="beginner-max" type="number" step="0.1" />
+        </div>
+      </div>
+
+      <h5>Intermediate</h5>
+      <div class="row">
+        <div>
+          <label>Min Wind (m/s)</label>
+          <input id="intermediate-min" type="number" step="0.1" />
+        </div>
+        <div>
+          <label>Optimal Min (m/s)</label>
+          <input id="intermediate-opt-min" type="number" step="0.1" />
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Optimal Max (m/s)</label>
+          <input id="intermediate-opt-max" type="number" step="0.1" />
+        </div>
+        <div>
+          <label>Max Wind (m/s)</label>
+          <input id="intermediate-max" type="number" step="0.1" />
+        </div>
+      </div>
+
+      <h5>Advanced</h5>
+      <div class="row">
+        <div>
+          <label>Min Wind (m/s)</label>
+          <input id="advanced-min" type="number" step="0.1" />
+        </div>
+        <div>
+          <label>Optimal Min (m/s)</label>
+          <input id="advanced-opt-min" type="number" step="0.1" />
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Optimal Max (m/s)</label>
+          <input id="advanced-opt-max" type="number" step="0.1" />
+        </div>
+        <div>
+          <label>Max Wind (m/s)</label>
+          <input id="advanced-max" type="number" step="0.1" />
+        </div>
+      </div>
+
+      <h4>Scoring Parameters</h4>
+      <div class="row">
+        <div>
+          <label>Wind Consistency Penalty</label>
+          <input id="wind-consistency-penalty" type="number" step="0.1" />
+        </div>
+        <div>
+          <label>Surface Flatwater Penalty</label>
+          <input id="surface-flatwater-penalty" type="number" step="0.1" />
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Surface Height Penalty</label>
+          <input id="surface-height-penalty" type="number" step="0.1" />
+        </div>
+        <div>
+          <label>Surface Chop Penalty</label>
+          <input id="surface-chop-penalty" type="number" step="0.1" />
+        </div>
+      </div>
+      <label>Safety Gust Penalty</label>
+      <input id="safety-gust-penalty" type="number" step="0.1" />
+    </div>
+
+    <div class="card">
+      <h3>Display Settings</h3>
+      <label>Map Type</label>
+      <select id="map-type">
+        <option value="interactive">Interactive Map</option>
+        <option value="image">Spot Image</option>
+      </select>
+    </div>
+
     <div class="actions">
       <button onclick="saveConfig()">Save Settings</button>
       <div id="msg" class="msg"></div>
@@ -169,12 +415,6 @@
         <input id="mapfile" type="file" accept="image/*" />
         <div class="actions" style="margin-top:10px"><button type="submit">Upload Map</button></div>
       </form>
-      <div class="row" style="margin-top:12px">
-        <div>
-          <label>Shoreline height (% of card)</label>
-          <input id="shorelineLen" type="number" min="10" max="90" />
-        </div>
-      </div>
     </div>
   </div>
 </body>

@@ -16,10 +16,14 @@ node_modules/
 data/
 app/static/spot-map.jpg
 app/static/spot-map.png
+# Keep overlays directory for compass
+!app/static/overlays/
+
 
 # Real configs and secrets
 config/config.json
 config/*.local.json
+config/
 .env
 .env.*
 *.key

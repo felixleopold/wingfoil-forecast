@@ -1,22 +1,32 @@
 services:
   wingfoil-forecast:
-    build: .
+    build:
+      context: .
+      target: production
     container_name: wingfoil-forecast
     restart: unless-stopped
+    environment:
+      - TZ=Europe/Berlin
     volumes:
       - ./data:/app/data
       - ./config:/app/config
+      - ./data/static:/app/static
+      - ./app/static/overlays:/app/static/overlays:ro
     networks:
       - web
-    environment:
-      - FLASK_ENV=production
-      - TZ=Europe/Berlin
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.wingfoil-forecast.rule=Host(`wingfoil.felixmrak.com`)"
-      - "traefik.http.routers.wingfoil-forecast.entrypoints=web"
-      - "traefik.http.routers.wingfoil-forecast.middlewares=auth-global@file"
-      - "traefik.http.services.wingfoil-forecast.loadbalancer.server.port=5000"
+      - traefik.enable=true
+      - traefik.docker.network=web
+      - traefik.http.routers.wingfoil-forecast.rule=Host(`wingfoil-forecast.felixmrak.com`) || Host(`wingfoil-forcast.felixmrak.com`)
+      - traefik.http.routers.wingfoil-forecast.entrypoints=web
+      - traefik.http.services.wingfoil-forecast.loadbalancer.server.port=5001
+      - traefik.http.routers.wingfoil-forecast.middlewares=auth-wingfoil-forecast@file
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
 
 networks:
   web:

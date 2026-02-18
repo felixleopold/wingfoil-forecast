@@ -1,115 +1,47 @@
-## Wingfoil Forecast Service
+# Wingfoil Forecast
 
-A Flask-based service that aggregates marine and weather data to analyze wingfoil suitability, provide equipment recommendations by rider weight, and serve a responsive dashboard plus JSON APIs. Deployed behind Traefik and Cloudflare Tunnel.
+A weather and wingfoil-condition service that aggregates multiple weather models to deliver **wingfoil suitability scores**, equipment recommendations, and forecast APIs—built for clarity, accuracy, and easy deployment.
 
-### Key Features
-- Real-time conditions and Today/Tomorrow forecasts
-- Wingfoil-specific scoring (0-100) and advice (wing size by weight)
-- Multi-model consensus (Open-Meteo primary, OpenWeatherMap secondary)
-- Mobile-friendly dashboard and health endpoint
-- Protected by Traefik middleware (global basic auth)
+---
 
-## Architecture
-- Flask app container built via `Dockerfile`
-- Traefik routes `wingfoil.felixmrak.com` to the container (port 5000)
-- Cloudflare Tunnel terminates TLS at the edge and forwards internally
-- Config and data mounted into the container (`./config`, `./data`)
+## What it does
 
-## Endpoints
-- GET `/` — Dashboard UI
-- GET `/health` — Service health JSON
-- GET `/api/current-conditions` — Current conditions with wingfoil analysis
-- GET `/api/hourly-forecast` — Today’s hourly forecast (daylight)
-- GET `/api/tomorrow-forecast` — Tomorrow’s hourly forecast (daylight)
-- GET `/api/inkypi/morning-report` — Simplified report for e‑ink displays
+- **Multi-model consensus** — Combines KNMI HARMONIE-AROME, DWD ICON-D2, ECMWF IFS, GFS, and OpenWeatherMap with weighted averaging and smart caching.
+- **Wingfoil scoring (0–100)** — Suitability score with gust penalties, wind/shore alignment, and wave conditions; click-through breakdown of how each score is calculated.
+- **Personalisation** — Wing size suggestions by rider weight, skill-level adjustments (beginner/intermediate/advanced), and configurable wind/wave thresholds.
+- **Web dashboard & APIs** — Browser UI for current conditions and forecasts; REST APIs for integration (e.g. InkyPi, other clients).
 
-## Configuration
-Edit `config/config.json` (copy from `config/config.example.json` if needed):
-- `location`: `name`, `latitude`, `longitude`, `shore_direction`
-- `wingfoil_preferences`: thresholds for wind/waves
-- `user`: `rider_weight_kg`, `skill_level`
-- `models`: list of forecast models (e.g., `gfs`, `icon_seamless`, `ecmwf_ifs04`)
+---
 
-## Local Development
-Requirements (`requirements.txt`): Flask, requests, aiohttp, python-dateutil.
-You can run locally inside Docker (recommended) or with Python:
+## Why it’s useful
 
-```bash
-# Python (dev) — requires env vars and config present
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-export FLASK_ENV=development
-python app/main.py
-```
+Generic weather apps don’t answer “is it good to go wingfoiling?” This service does: it turns raw marine and standard weather data into a single, interpretable score and equipment guidance, so you can decide quickly and safely. It’s built with Dutch/European spots in mind (with a default location) but works globally via the included models.
 
-## Deploy
-### Using the repository script
-```bash
-cd ~/websites/data/wingfoil-forecast
-bash deploy.sh
-```
-The script builds, starts the container, waits briefly, and checks `/health`.
+---
 
-### Using Docker Compose directly
-```bash
-cd ~/websites/data/wingfoil-forecast
-docker compose up -d --build
-```
+## Screenshot
 
-## Runtime & Routing
-The service is defined in `docker-compose.yml`:
+The main dashboard view shows current and forecasted conditions, the 0–100 wingfoil score, and key details like wind, gusts, and wave state:
 
-```yaml
-services:
-  wingfoil-forecast:
-    build: .
-    container_name: wingfoil-forecast
-    restart: unless-stopped
-    volumes:
-      - ./data:/app/data
-      - ./config:/app/config
-    networks:
-      - web
-    environment:
-      - FLASK_ENV=production
-      - TZ=Europe/Berlin
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.wingfoil-forecast.rule=Host(`wingfoil.felixmrak.com`)"
-      - "traefik.http.routers.wingfoil-forecast.entrypoints=web"
-      - "traefik.http.routers.wingfoil-forecast.middlewares=auth-global@file"
-      - "traefik.http.services.wingfoil-forecast.loadbalancer.server.port=5000"
+![Wingfoil forecast dashboard](docs/images/dashboard.png)
 
-networks:
-  web:
-    external: true
-```
+---
 
-Notes:
-- Domain: `wingfoil.felixmrak.com`
-- Traefik middleware `auth-global@file` is expected to be defined in the parent stack under `config/traefik/dynamic_conf/auth.yml`.
-- TLS is terminated at Cloudflare; Traefik listens on the internal entrypoint.
+## Tech stack & architecture
 
-## Manage via central script
-From the repo root:
-```bash
-cd ~/websites
-./manage-websites.sh
-```
-Select `wingfoil-forecast` to view options (deploy/start/stop/restart/logs/status/update).
+- **Backend:** Python 3.11, **Flask** (Gunicorn in production).
+- **Data:** Async/parallel fetching (**aiohttp**, **requests**), thread-safe in-memory cache with configurable TTL and max age.
+- **Deployment:** **Docker** (multi-stage Dockerfile: dev with hot-reload, production with non-root user), **docker-compose** with Traefik labels, optional basic auth.
+- **APIs:** REST endpoints for current conditions, hourly and multi-day forecasts, tomorrow summary, daily summary, and InkyPi-oriented morning report; config and health checks.
 
-## Troubleshooting
-- Check container: `docker ps --filter "name=wingfoil-forecast"`
-- View logs: `docker logs wingfoil-forecast --tail 100 -f`
-- Traefik logs: `docker logs traefik`
-- Cloudflare Tunnel: `systemctl status cloudflared`
-- Health: `curl https://wingfoil.felixmrak.com/health`
+High-level flow: **Config** (location, shore direction, preferences) → **Weather fetchers** (per model) → **Cache** → **Consensus & scoring** → **Dashboard + JSON APIs**.
 
-## Security
-- Protected by Traefik basic auth middleware (global)
-- Origin is not exposed publicly; access is via Cloudflare Tunnel
-- Avoid committing secrets; see `GITLEAKS_README.md` and `.gitleaks.toml`
+---
 
+## Project structure (summary)
 
-
-
+- `app/main.py` — Flask app, routes, caching, scoring, and model aggregation.
+- `app/templates/` — Dashboard, settings, API help (HTML).
+- `app/static/` — Static assets and overlay SVGs.
+- `config/` — Config and example config (not committed).
+- `docs/` — Internal docs and screenshots.

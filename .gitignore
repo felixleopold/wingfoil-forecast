@@ -33,7 +33,9 @@ config/*.local.json
 gitleaks-report.json
 security-scan.log
 
+*.md
 
-GITLEAKS_README.md
+!README.md
+
 scripts/
 .github/

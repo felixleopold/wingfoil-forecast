@@ -14,12 +14,10 @@
   },
   "models": [
     "gfs",
-    "icon_seamless",
     "ecmwf_ifs04"
   ],
   "model_weights": {
     "ecmwf_ifs04": 1,
-    "icon_seamless": 1,
     "gfs": 1,
     "openweather": 1
   },
